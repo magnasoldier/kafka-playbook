@@ -1,0 +1,6 @@
+venv
+hosts.yml
+certs
+*.sh
+.idea
+*.pem

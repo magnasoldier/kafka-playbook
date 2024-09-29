@@ -1,0 +1,5 @@
+#!/bin/bash
+export KAFKA_OPTS="$KAFKA_OPTS -javaagent:{{ exporter_dir }}/jmx_prometheus_javaagent-{{ metrics_jmx_version }}.jar={{ metrics_jmx_port }}:{{ jmx_exporter_config }}"
+
+
+{{ lookup('file', '{{ start_kafka_local_path }}') }}

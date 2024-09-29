@@ -1,0 +1,14 @@
+[v3_ca]
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = {{ inventory_hostname }}.{{ base_domain }}
+IP.1 = {{ ansible_host }}
+IP.2 = 127.0.0.1
+{% set counter_ip = 3 %}
+{%  for ip in extra_ip_sans %}
+IP.{{ counter_ip }} = {{ ip }}
+{% set counter_ip = counter_ip + 1 %}
+{%  endfor %}
+{% if groups['load-balancer'] | length > 0 %}
+IP.{{ counter_ip }} = {{ hostvars[groups['load-balancer'][0]]['ansible_host'] }}
+{% endif %}

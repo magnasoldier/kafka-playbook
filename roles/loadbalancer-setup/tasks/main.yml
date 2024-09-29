@@ -1,0 +1,20 @@
+---
+
+- name: Setup HAProxy
+  apt:
+    name: haproxy
+    state: present
+    update_cache: yes
+
+- name: Generate HAProxy config
+  template:
+    src: haproxy.cfg.j2
+    dest: "{{ haproxy_config }}"
+    owner: haproxy
+    group: haproxy
+    mode: 0644
+
+- name: Restart haproxy server
+  systemd:
+    name: haproxy
+    state: restarted

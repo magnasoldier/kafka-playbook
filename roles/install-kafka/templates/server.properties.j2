@@ -1,0 +1,29 @@
+node.id={{ node_id }}
+
+process.roles=broker{% if inventory_hostname in groups['controllers'] %},controller{% endif %}
+
+metadata.log.dir={{ metadata_dir }}
+log.dirs={{ logs_dir }}
+
+listeners=INTERNAL://:9091,EXTERNAL://:9092{% if inventory_hostname in groups['controllers'] %},CONTROLLER://:9093{% endif %}
+
+
+advertised.listeners=INTERNAL://{{ ansible_host }}:9091,EXTERNAL://{{ ansible_host }}:9092
+
+listener.security.protocol.map=INTERNAL:SSL,EXTERNAL:SSL,CONTROLLER:SSL
+
+inter.broker.listener.name=INTERNAL
+controller.listener.names=CONTROLLER
+
+controller.quorum.voters={{ hostvars[groups['controllers'][0]]['node_id'] }}@{{ hostvars[groups['controllers'][0]]['ansible_host'] }}:9093{% if groups['controllers'] | length > 1 %}{% for worker in groups['controllers'][1:] %},{{ hostvars[worker]['node_id'] }}@{{ hostvars[worker]['ansible_host'] }}:9093{% endfor %}{% endif %}
+
+ssl.keystore.location={{ certs_dir }}/{{ inventory_hostname }}.p12
+ssl.keystore.password={{ cert_password }}
+ssl.key.password={{ cert_password }}
+ssl.keystore.type=PKCS12
+
+ssl.truststore.location={{ certs_dir }}/{{ truststore_file }}
+ssl.truststore.password={{ cert_password }}
+ssl.truststore.type=JKS
+
+ssl.client.auth=none

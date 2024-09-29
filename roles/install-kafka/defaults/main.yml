@@ -1,0 +1,10 @@
+---
+
+kafka_storage_path: "{{ kafka_path }}/bin/kafka-storage.sh"
+server_properties_path: "{{ kafka_path }}/config/kraft/server.properties"
+client_properties_path: "{{ kafka_path }}/config/kraft/client.properties"
+start_kafka_server_path: "{{ kafka_path }}/bin/kafka-server-start.sh"
+kafka_log_path: "{{ kafka_path }}/kafka.log"
+logs_dir: "{{ kafka_path }}/data/logs"
+metadata_dir: "{{ kafka_path }}/data/metadata"
+stop_kafka_server_path: "{{ kafka_path }}/bin/kafka-server-stop.sh"

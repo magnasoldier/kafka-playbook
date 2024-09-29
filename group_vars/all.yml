@@ -1,0 +1,53 @@
+### Kafka installation ###
+# Path of Kafka installation
+kafka_path: "/opt/kafka"
+
+# Path for Kafka certificates
+certs_dir: "/etc/ssl/kafka"
+
+
+### TLS ###
+# Default names for keys, certificates, truststore and keystore
+key_name: "tls-key.pem"
+cert_name: "tls-cert.pem"
+pkcs12_name: "cert.p12"
+jks_name: "keystore.jks"
+truststore_file: "truststore.jks"
+keystore_jks_name: "{{ inventory_hostname }}-keystore.jks"
+csr_name: "{{ inventory_hostname }}.csr"
+
+
+
+### Names resolving ###
+# Which base domain to use
+base_domain: "kafka.corp"
+
+# Which user and group Kafka uses
+kafka_user: "kafka"
+kafka_group: "kafka"
+
+
+### Metrics ###
+metrics_enabled: "true"
+
+# Nginx parameters for Kafka metrics
+nginx_certs_dir: "/etc/ssl/nginx"
+nginx_metrics_port: "8443"
+
+# JMX Exporter parameters
+metrics_jmx_port: "7071"
+metrics_jmx_version: "0.16.1"
+
+
+### Extra IP SANs ###
+# Use this list to specify extra IP addresses to be added into certificates (e.g. your custom proxies etc.)
+extra_ip_sans: []
+
+### CA settings ###
+# If you have your own CA or want to change default names for generated CA, you should manage settings below
+ca_key_name: "ca-key.pem"
+ca_cert_name: "ca-cert.pem"
+
+# This is the directory where you CA stored
+local_cert_dir: "{{ playbook_dir }}/certs"
+

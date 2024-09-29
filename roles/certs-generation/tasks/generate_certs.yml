@@ -1,0 +1,104 @@
+---
+
+- name: Generate private key for each node
+  openssl_privatekey:
+    passphrase: "{{ cert_password }}"
+    path: "{{ certs_dir }}/{{ key_name }}"
+    size: 2048
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+
+- name: Copy SAN config to nodes
+  template:
+    src: "san.cfg.j2"
+    dest: "{{ certs_dir }}/san.cfg"
+    mode: 0640
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+
+- name: Generate CSR
+  command: >
+    openssl req -new 
+    -config "{{ certs_dir }}/san.cfg"
+    -key "{{ certs_dir }}/{{ key_name }}"
+    -out "{{ certs_dir }}/{{ inventory_hostname }}.csr"
+    -passin pass:{{ cert_password }}
+    -subj "/C=US/ST=California/L=San Francisco/O=MyOrganization/OU=IT Department/CN={{ inventory_hostname }}.{{ base_domain }}"
+    -addext "subjectAltName=DNS:{{ inventory_hostname }}.{{ base_domain }},IP:{{ ansible_host | trim }}"
+  args:
+    creates: "{{ certs_dir }}/{{ inventory_hostname }}.csr"
+
+- name: Generate certificate
+  command: >
+    openssl x509 -req -in "{{ certs_dir }}/{{ inventory_hostname }}.csr" 
+    -CA "{{ certs_dir }}/{{ ca_cert_name }}" -CAkey "{{ certs_dir }}/{{ ca_key_name }}"
+    -CAcreateserial -out "{{ certs_dir }}/{{ cert_name }}" 
+    -days 365 -sha256
+    -extfile "{{ certs_dir }}/san.cfg"
+    -extensions v3_ca
+  args:
+    creates: "{{ certs_dir }}/{{ cert_name }}"
+
+- name: Generate PKCS storage
+  command: >
+    openssl pkcs12
+    -export -out "{{ certs_dir }}/{{ inventory_hostname }}.p12"
+    -inkey "{{ certs_dir }}/{{ key_name }}"
+    -in "{{ certs_dir }}/{{ cert_name }}"
+    -certfile "{{ certs_dir }}/{{ ca_cert_name }}"
+    -passin pass:{{ cert_password }}
+    -passout pass:{{ cert_password }}
+  args:
+    creates: "{{ certs_dir }}/{{ inventory_hostname }}.p12"
+
+- name: Add CA to Truststore
+  command: >
+    keytool -import
+    -alias your-ca
+    -file "{{ certs_dir }}/{{ ca_cert_name }}"
+    -keystore "{{ certs_dir }}/{{ truststore_file }}"
+    -storepass "{{ cert_password }}"
+    -noprompt
+  args:
+    creates: "{{ certs_dir }}/{{ truststore_file }}"
+
+- name: Grant privileges to kafka user for PKCS
+  file:
+    path: "{{ certs_dir }}/{{ inventory_hostname }}.p12"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0640
+
+- name: Grant privileges to kafka for truststore
+  file:
+    path: "{{ certs_dir }}/{{ truststore_file }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0640
+
+#- name: Generate CSR for each node
+#  openssl_csr:
+#    subject:
+#      C: "US"
+#      ST: "State"
+#      L: "City"
+#      O: "Organization"
+#      OU: "OrgUnit"
+#    path: "{{ certs_dir }}/{{ inventory_hostname }}"
+#    privatekey_path: "{{ certs_dir }}/{{ key_name }}"
+#    common_name: "{{ inventory_hostname }}.{{ base_domain }}"
+#    subject_alt_name:
+#      - "DNS: {{ inventory_hostname }}.{{ base_domain }}"
+#      - "IP:{{ ansible_host | trim }}"
+#      - "IP:127.0.0.1"
+#
+#- name: Generate certificates
+#  openssl_certificate:
+#    path: "{{ certs_dir }}/{{ cert_name }}"
+#    csr_path: "{{ certs_dir }}/{{ inventory_hostname }}.csr"
+#    provider: ownca
+#    ownca_path: "{{ certs_dir }}/{{ ca_cert_name }}"
+#    ownca_privatekey_path: "{{ certs_dir }}/{{ ca_key_name }}"
+#    ownca_not_after: "+3650d"
+#    ownca_create_subject_key_identifier: always_create
+#    ownca_create_authority_key_identifier: true

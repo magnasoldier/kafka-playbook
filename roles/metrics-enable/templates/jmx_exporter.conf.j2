@@ -1,0 +1,16 @@
+server {
+    listen {{ nginx_metrics_port }} ssl;
+    server_name {{ ansible_host }};
+
+    ssl_certificate {{ nginx_certs_dir }}/{{ cert_name }};
+    ssl_certificate_key {{ nginx_certs_dir }}/{{ key_name }};
+
+#    ssl_verify_client on;
+#    ssl_client_certificate {{ nginx_certs_dir }}/{{ ca_cert_name }};
+#    ssl_verify_depth 2;
+
+    location / {
+        proxy_pass http://localhost:7071;
+        proxy_set_header Host $host;
+    }
+}

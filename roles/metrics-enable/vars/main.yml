@@ -1,0 +1,8 @@
+---
+
+exporter_dir: "/opt/kafka-exporter"
+jmx_exporter_config: "{{ exporter_dir }}/kafka_jmx_exporter.yaml"
+start_kafka_local_path: "{{ playbook_dir }}/kafka-server-start.sh"
+jmx_exporter_nginx_config: "{{ sites_available_path }}/jmx_exporter"
+
+start_kafka_server_metrics_path: "{{ kafka_path }}/bin/kafka-server-metrics-start.sh"

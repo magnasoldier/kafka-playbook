@@ -1,0 +1,23 @@
+---
+
+- name: Grant all privileges for Kafka
+  file:
+    path: "{{ kafka_path }}"
+    recurse: true
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0770
+
+- name: Grant all privileges for certs to Kafka
+  file:
+    path: "{{ certs_dir }}"
+    recurse: true
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0770
+
+- name: Start Kafka service
+  systemd:
+    name: kafka
+    state: started
+    enabled: true

@@ -1,0 +1,122 @@
+---
+
+- name: Fetch Kafka start script
+  fetch:
+    validate_checksum: false
+    flat: yes
+    src: "{{ start_kafka_server_path }}"
+    dest: "{{ start_kafka_local_path }}"
+
+- name: Create JMX exporter directory
+  file:
+    state: directory
+    path: "{{ exporter_dir }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0774
+
+- name: Download JMX exporter
+  get_url:
+    dest: "{{ exporter_dir }}"
+    url: "{{ exporter_repo_url }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0774
+
+- name: Generate metrics config template
+  copy:
+    src: new-config-jmx.yaml
+    dest: "{{ jmx_exporter_config }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0774
+
+- name: Distribute new script
+  template:
+    src: kafka-start-server.sh.j2
+    dest: "{{ start_kafka_server_metrics_path }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0774
+
+- name: Remove old service file
+  file:
+    path: "/etc/systemd/system/kafka.service"
+    state: absent
+
+- name: Generate new service file
+  template:
+    src: kafka.service.j2
+    dest: "/etc/systemd/system/kafka.service"
+
+- name: Restart Kafka service
+  systemd:
+    daemon_reload: true
+    name: kafka
+    state: restarted
+
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Create nginx certificates directory
+  file:
+    path: "{{ nginx_certs_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0660
+
+- name: Copy certificate
+  command:
+    cmd: >
+      cp {{ certs_dir }}/{{ cert_name }} {{ nginx_certs_dir }}/{{ cert_name }}
+  args:
+    creates: "{{ nginx_certs_dir }}/{{ cert_name }}"
+
+- name: Copy private key
+  command:
+    cmd: >
+      openssl rsa -in {{ certs_dir }}/{{ key_name }} -out {{ nginx_certs_dir }}/{{ key_name }} -passin pass:{{ cert_password }}
+  args:
+    creates: "{{ nginx_certs_dir }}/{{ key_name }}"
+
+- name: Copy CA certificate
+  command:
+    cmd: >
+      cp {{ certs_dir }}/{{ ca_cert_name }} {{ nginx_certs_dir }}/{{ ca_cert_name }}
+  args:
+    creates: "{{ nginx_certs_dir }}/{{ ca_cert_name }}"
+
+- name: Grant privileges to nginx
+  file:
+    path: "{{ nginx_certs_dir }}"
+    recurse: yes
+    owner: www-data
+    group: www-data
+    mode: 0660
+
+- name: Generate exporter nginx config
+  template:
+    src: jmx_exporter.conf.j2
+    dest: "{{ jmx_exporter_nginx_config }}"
+    mode: 0770
+    owner: www-data
+    group: www-data
+
+- name: Create symlink for nginx config
+  file:
+    src: "{{ jmx_exporter_nginx_config }}"
+    dest: "{{ sites_enabled_path }}/{{ jmx_exporter_nginx_config | basename }}"
+    state: link
+    mode: 0770
+    owner: www-data
+    group: www-data
+
+- name: Start nginx
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: true

@@ -1,0 +1,9 @@
+lowercaseOutputName: true
+rules:
+  - pattern: "kafka.server<type=(.+), name=(.+)><>Value"
+    name: "kafka_server_$1_$2"
+    type: GAUGE
+    help: "Kafka server metric $1 $2"
+  - pattern: ".*"
+    name: "jmx_$0"
+    help: "Automatically collected JMX metric $0"

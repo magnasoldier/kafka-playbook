@@ -1,0 +1,12 @@
+bootstrap.servers={{ ansible_host }}:9092
+
+security.protocol=SSL
+
+ssl.truststore.location={{ certs_dir }}/{{ truststore_file }}
+ssl.truststore.password={{ cert_password }}
+ssl.truststore.type=JKS
+
+client.id=my-client
+acks=all
+retries=3
+retry.backoff.ms=1000
