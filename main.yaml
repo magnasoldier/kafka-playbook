@@ -1,10 +1,10 @@
 ---
 
-- name: Load balancer set up
-  hosts: load-balancer
-  roles:
-    - role: loadbalancer-setup
-      when: groups['load-balancer'] | length > 0
+#- name: Load balancer set up
+#  hosts: load-balancer
+#  roles:
+#    - role: loadbalancer-setup
+#      when: groups['load-balancer'] | length > 0
 
 - name: Java installation
   hosts: all:!load-balancer
@@ -13,11 +13,9 @@
       prompt: "Enter cert password"
       private: yes
   roles:
-      - role: install-kafka
-      - role: certs-generation
-      - role: startup-kafka
-      - role: metrics-enable
-        when: metrics_enabled == "true"
+    - role: certs-generation
+    - role: install-kafka
+
 
 
 

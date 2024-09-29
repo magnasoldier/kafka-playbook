@@ -10,7 +10,11 @@ listeners=INTERNAL://:9091,EXTERNAL://:9092{% if inventory_hostname in groups['c
 
 advertised.listeners=INTERNAL://{{ ansible_host }}:9091,EXTERNAL://{{ ansible_host }}:9092
 
+{% if not sasl_enabled %}
 listener.security.protocol.map=INTERNAL:SSL,EXTERNAL:SSL,CONTROLLER:SSL
+{% else %}
+listener.security.protocol.map=INTERNAL:SASL_SSL,EXTERNAL:SASL_SSL,CONTROLLER:SSL
+{% endif %}
 
 inter.broker.listener.name=INTERNAL
 controller.listener.names=CONTROLLER
@@ -27,3 +31,9 @@ ssl.truststore.password={{ cert_password }}
 ssl.truststore.type=JKS
 
 ssl.client.auth=none
+
+
+{% if sasl_enabled %}
+sasl.enabled.mechanisms=SCRAM-SHA-256
+sasl.mechanism.inter.broker.protocol=SCRAM-SHA-256
+{% endif %}

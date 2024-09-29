@@ -1,118 +1,26 @@
 ---
 
-- name: Install JDK and wget
-  apt:
-    state: present
-    update_cache: yes
-    name:
-      - wget
-      - openjdk-11-jdk
+- name: Kafka installation and base configuration
+  include_tasks: kafka.yml
 
-- name: Ensure Kafka user exists
-  user:
-    name: "{{ kafka_user }}"
-    comment: "Kafka service account"
-    shell: /bin/false
-    create_home: no
-    system: yes
-    state: present
+- name: Distribute CA
+  include_tasks: distribute_ca.yml
 
-- name: Create kafka directory
-  file:
-    state: directory
-    path: "{{ kafka_path }}"
-    mode: 0760
-    owner: "{{ kafka_user }}"
-    group: "{{ kafka_group }}"
+- name: Generate certificates
+  include_tasks: generate_certs.yml
 
-- name: Download Kafka archive
-  get_url:
-    url: "{{ kafka_url }}"
-    dest: "{{ kafka_path }}"
-    mode: 0760
-    owner: "{{ kafka_user }}"
-    group: "{{ kafka_group }}"
+- name: Kafka start up
+  include_tasks: startup.yml
 
-- name: Unpack Kafka archive
-  unarchive:
-    src: "{{ kafka_path }}/{{ kafka_archive }}"
-    dest: "{{ kafka_path }}"
-    remote_src: yes
-    extra_opts: [ '--strip-components=1' ]
+#- name: Kafka SASL mechanism configuration
+#  include_tasks: sasl.yml
+#  when: sasl_enabled == "true"
 
-- name: Generate ClusterID
-  command:
-    cmd: "{{ kafka_storage_path }} random-uuid"
-  register: random_uuid_output
-  when: inventory_hostname == groups['controllers'][0]
+- name: Kafka metrics exporter configuration
+  include_tasks: metrics.yml
+  when: metrics_enabled == "true"
 
-- name: Define ClusterID value
-  set_fact:
-    cluster_id: random_uuid_output.stdout
 
-- name: Create logs directory
-  file:
-    state: directory
-    path: "{{ logs_dir }}"
-    owner: "{{ kafka_user }}"
-    group: "{{ kafka_group }}"
-    mode: 0760
-
-- name: Create metadata directory
-  file:
-    state: directory
-    path: "{{ metadata_dir }}"
-    owner: "{{ kafka_user }}"
-    group: "{{ kafka_group }}"
-    mode: 0760
-
-- name: Remove default properties file
-  file:
-    state: absent
-    path: "{{ server_properties_path }}"
-
-- name: Remove default client properties
-  file:
-    state: absent
-    path: "{{ client_properties_path }}"
-
-- name: Generate properties file from template
-  template:
-    src: server.properties.j2
-    dest: "{{ server_properties_path }}"
-    owner: "{{ kafka_user }}"
-    group: "{{ kafka_group }}"
-    mode: 0744
-
-- name: Generate client properties file
-  template:
-    src: client.properties.j2
-    dest: "{{ client_properties_path }}"
-    owner: "{{ kafka_user }}"
-    group: "{{ kafka_group }}"
-    mode: 0760
-
-- name: Generate Kafka service file
-  template:
-    src: kafka.service.j2
-    dest: "/etc/systemd/system/kafka.service"
-
-- name: Update systemd daemon
-  systemd:
-    daemon_reload: true
-
-- name: Format Kafka storage
-  command:
-    cmd: "{{ kafka_storage_path }} format -t {{ cluster_id }} -c {{ server_properties_path }}"
-#
-#- name: Start Kafka server
-#  command:
-#    cmd: "nohup {{ start_kafka_server_path }} {{ server_properties_path }} &"
-#  register: kafka_start_server_output
-#
-#- name: Debug server start
-#  debug:
-#    msg: "{{ kafka_start_server_output }}"
 
 
     

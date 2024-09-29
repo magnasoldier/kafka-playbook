@@ -1,0 +1,11 @@
+KafkaServer {
+    org.apache.kafka.common.security.scram.ScramLoginModule required;
+};
+
+{% if not custom_auth_config %}
+KafkaClient {
+    org.apache.kafka.common.security.scram.ScramLoginModule required
+    username="{{ default_sasl_user }}"
+    password="{{ default_sasl_password }}";
+};
+{% endif %}

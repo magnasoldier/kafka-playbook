@@ -51,3 +51,12 @@ ca_cert_name: "ca-cert.pem"
 # This is the directory where you CA stored
 local_cert_dir: "{{ playbook_dir }}/certs"
 
+
+### SASL settings ###
+
+# Still in development...
+sasl_enabled: "false"
+
+# If you set 'true' you should define custom passwords for each broker in custom_auth_config.yml
+# ! NOT WORKING NOW ! #
+custom_auth_config: "false"

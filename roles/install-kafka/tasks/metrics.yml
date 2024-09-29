@@ -1,12 +1,5 @@
 ---
 
-- name: Fetch Kafka start script
-  fetch:
-    validate_checksum: false
-    flat: yes
-    src: "{{ start_kafka_server_path }}"
-    dest: "{{ start_kafka_local_path }}"
-
 - name: Create JMX exporter directory
   file:
     state: directory
@@ -30,30 +23,6 @@
     owner: "{{ kafka_user }}"
     group: "{{ kafka_group }}"
     mode: 0774
-
-- name: Distribute new script
-  template:
-    src: kafka-start-server.sh.j2
-    dest: "{{ start_kafka_server_metrics_path }}"
-    owner: "{{ kafka_user }}"
-    group: "{{ kafka_group }}"
-    mode: 0774
-
-- name: Remove old service file
-  file:
-    path: "/etc/systemd/system/kafka.service"
-    state: absent
-
-- name: Generate new service file
-  template:
-    src: kafka.service.j2
-    dest: "/etc/systemd/system/kafka.service"
-
-- name: Restart Kafka service
-  systemd:
-    daemon_reload: true
-    name: kafka
-    state: restarted
 
 - name: Install nginx
   apt:

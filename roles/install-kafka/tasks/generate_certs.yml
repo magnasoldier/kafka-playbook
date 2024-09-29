@@ -76,6 +76,14 @@
     group: "{{ kafka_group }}"
     mode: 0640
 
+- name: Grant all privileges for certs to Kafka
+  file:
+    path: "{{ certs_dir }}"
+    recurse: true
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_group }}"
+    mode: 0770
+
 #- name: Generate CSR for each node
 #  openssl_csr:
 #    subject:

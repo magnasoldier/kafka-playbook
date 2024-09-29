@@ -1,0 +1,6 @@
+---
+
+### It is highly recommended to use ansible-vault to encrypt this file. Never submit this file anywhere if production data is specified in this section.
+
+default_sasl_user: "username"
+default_sasl_password: "password"

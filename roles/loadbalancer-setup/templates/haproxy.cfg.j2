@@ -46,6 +46,6 @@ listen kafka_nodes_front
 backend kafka_nodes_backend
     mode tcp
     balance roundrobin
-    {% for node in groups['kafka_nodes'] %}
+{% for node in groups['kafka_nodes'] %}
     server {{ hostvars[node]['inventory_hostname'] }} {{ hostvars[node]['ansible_host'] }}:9092 check
-    {% endfor %}
+{% endfor %}

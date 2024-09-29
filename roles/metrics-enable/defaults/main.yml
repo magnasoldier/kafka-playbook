@@ -1,9 +1,0 @@
----
-
-start_kafka_server_path: "{{ kafka_path }}/bin/kafka-server-start.sh"
-exporter_repo_url: "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/{{ metrics_jmx_version }}/jmx_prometheus_javaagent-{{ metrics_jmx_version }}.jar"
-nginx_path: "/etc/nginx"
-sites_available_path: "{{ nginx_path }}/sites-available"
-sites_enabled_path: "{{ nginx_path }}/sites-enabled"
-server_properties_path: "{{ kafka_path }}/config/kraft/server.properties"
-stop_kafka_server_path: "{{ kafka_path }}/bin/kafka-server-stop.sh"
