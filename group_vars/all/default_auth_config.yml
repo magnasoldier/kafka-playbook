@@ -1,6 +1,15 @@
 ---
 
-### It is highly recommended to use ansible-vault to encrypt this file. Never submit this file anywhere if production data is specified in this section.
+### It is highly recommended to use ansible-vault to encrypt this file
+### NEVER submit this file anywhere if production data is specified in this section
 
 default_sasl_user: "username"
 default_sasl_password: "password"
+
+
+default_sasl_broker: "broker"
+default_sasl_broker_password: "password"
+
+
+kafka_admin_name: "kafka-admin"
+kafka_admin_password: "admin-password"

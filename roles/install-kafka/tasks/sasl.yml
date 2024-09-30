@@ -1,20 +1,14 @@
 ---
 
-#- name: Generate jaas config file
-#  template:
-#    src: jaas.conf.j2
-#    dest: "{{ kafka_jaas_path }}"
-#    owner: "{{ kafka_user }}"
-#    group: "{{ kafka_group }}"
-#    mode: 0760
-
-- name: Create default user
+- name: Create admin user
   command:
     cmd: >
-      {{ kafka_config_script_path }}
-      --bootstrap-server {{ ansible_host }}:9091 
-      --alter --add-config 'SCRAM-SHA-256=[password={{ default_sasl_password }}]' 
-      --entity-type users 
-      --entity-name {{ default_sasl_user }}
+      {{ kafka_config_script_path }} --bootstrap-server {{ ansible_host }}:9091 \
+        --alter --add-config 'SCRAM-SHA-256=[password={{ kafka_admin_password }}]' \
+        --entity-type users --entity-name {{ kafka_admin_name }} \
+        --command-config {{ client_properties_path }}
+  run_once: true
+  
+  
 
 # To be continued

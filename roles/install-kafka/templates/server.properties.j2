@@ -13,7 +13,8 @@ advertised.listeners=INTERNAL://{{ ansible_host }}:9091,EXTERNAL://{{ ansible_ho
 {% if not sasl_enabled %}
 listener.security.protocol.map=INTERNAL:SSL,EXTERNAL:SSL,CONTROLLER:SSL
 {% else %}
-listener.security.protocol.map=INTERNAL:SASL_SSL,EXTERNAL:SASL_SSL,CONTROLLER:SSL
+listener.security.protocol.map=INTERNAL:SSL,EXTERNAL:SASL_SSL,CONTROLLER:SSL
+super.users=User:{{ kafka_admin_name }}
 {% endif %}
 
 inter.broker.listener.name=INTERNAL

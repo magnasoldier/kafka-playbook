@@ -45,6 +45,7 @@ extra_ip_sans: []
 
 ### CA settings ###
 # If you have your own CA or want to change default names for generated CA, you should manage settings below
+generate_ca: "true"
 ca_key_name: "ca-key.pem"
 ca_cert_name: "ca-cert.pem"
 
@@ -56,6 +57,8 @@ local_cert_dir: "{{ playbook_dir }}/certs"
 
 # Still in development...
 sasl_enabled: "false"
+
+kafka_admin_name: "kafka-admin"
 
 # If you set 'true' you should define custom passwords for each broker in custom_auth_config.yml
 # ! NOT WORKING NOW ! #
